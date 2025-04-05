@@ -11,13 +11,6 @@ import com.intellij.openapi.editor.Document
 class GenerateKdoc : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
-
-
-        val project = e.project ;
-        val dialog = dialogUI(project) ;
-        dialog.show()
-
-
         val editor = e.getData(CommonDataKeys.EDITOR) ?: return
         val document = editor.document
         val caretOffset = editor.caretModel.offset
