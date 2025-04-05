@@ -16,8 +16,7 @@ repositories {
 intellij {
     version.set("2024.1.7")
     type.set("IC") // Target IDE Platform
-
-    plugins.set(listOf(/* Plugin Dependencies */))
+    plugins.set(listOf("Kotlin"))
 }
 
 java {
@@ -45,6 +44,14 @@ tasks {
         certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
         privateKey.set(System.getenv("PRIVATE_KEY"))
         password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
+    }
+
+    patchPluginXml {
+        changeNotes.set("Added GenerateKDocAction")
+    }
+
+    runIde {
+        jvmArgs = listOf("--enable-native-access=ALL-UNNAMED")
     }
 
     publishPlugin {
