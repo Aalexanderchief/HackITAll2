@@ -11,6 +11,17 @@ repositories {
     mavenCentral()
 }
 
+sourceSets {
+    main {
+        kotlin.srcDirs("src/main/kotlin")
+        java.srcDirs("src/main/java")
+    }
+    test {
+        kotlin.srcDirs("src/test/kotlin")
+        java.srcDirs("src/test/java")
+    }
+}
+
 // Configure Gradle IntelliJ Plugin
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 intellij {
