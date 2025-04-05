@@ -36,5 +36,13 @@
                 description="Displays a greeting">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
+
+        <action
+                id="com.hackitall.actions.speech_to_text.SpeechToTextAction"
+                class="com.hackitall.actions.speech_to_text.SpeechToTextAction"
+                text="Speech To Text"
+                description="Record speech and display the result">
+            <add-to-group group-id="ToolsMenu" anchor="first"/>
+        </action>
     </actions>
 </idea-plugin>
