@@ -7,6 +7,7 @@ import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.ui.DialogWrapper
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
@@ -30,8 +31,7 @@ class SpeechToTextAction : AnAction("Record Speech") {
     }
 
     inner class RecordingDialog : DialogWrapper(true) {
-
-        private val apiKey = "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"
+        private val apiKey = "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"
 
         init {
             init()
@@ -112,31 +112,36 @@ class SpeechToTextAction : AnAction("Record Speech") {
         }
 
         private fun transcribeAudio(audioData: ByteArray): String {
-//            val apiKey = "YOUR_OPENAI_API_KEY"  // Replace with your OpenAI API key
             val client = OkHttpClient.Builder().callTimeout(30, TimeUnit.SECONDS).build()
 
-            val requestBody = RequestBody.create(
-                "audio/wav".toMediaTypeOrNull(),
-                audioData
-            )
+            // Prepare the audio data for Hugging Face API (using multipart form-data)
+            val requestBody = MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("file", "audio.wav", audioData.toRequestBody("audio/wav".toMediaTypeOrNull()))
+                .build()
 
+            println("requestBody: $requestBody")
+
+            // Make sure you use the correct Hugging Face API URL (replace with your desired model)
             val request = Request.Builder()
-                .url("https://api.openai.com/v1/audio/transcriptions")
+                .url("https://api-inference.huggingface.co/models/openai/whisper-large-v3-turbo")
                 .header("Authorization", "Bearer $apiKey")
                 .post(requestBody)
                 .build()
 
+            println("request: $request")
+
             try {
                 val response = client.newCall(request).execute()
 
+                println("response: $response")
+
                 // Check if the response was successful
                 if (response.isSuccessful) {
-                    // Response is OK, proceed to access the body
                     val responseBody = response.body?.string()
                     return if (responseBody != null) {
-                        // Parse and return the transcription from the response
+                        // Parse the response JSON and extract the transcription
                         val jsonResponse = JsonParser.parseString(responseBody).asJsonObject
-//                        val transcription = jsonResponse.getAsJsonArray("text")[0].asString
                         val transcription = jsonResponse.get("text").asString
                         println("Transcription successful: $transcription")
                         transcription
@@ -145,8 +150,9 @@ class SpeechToTextAction : AnAction("Record Speech") {
                         "No response body"
                     }
                 } else {
-                    // Response was not successful, handle the error
-                    println("Error in transcription request: ${response.message}")
+                    // Print the error response body for debugging
+                    val responseBody = response.body?.string()
+                    println("Error response body: $responseBody")
                     return "Error transcribing audio"
                 }
             } catch (e: IOException) {
