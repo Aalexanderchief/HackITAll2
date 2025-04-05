@@ -25,16 +25,21 @@
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
+
+        <toolWindow id="MascotView" anchor="bottom" factoryClass="com.hackitall.actions.MascotToolWindowFactory"
+                     secondary="true" canCloseContents="false"/>
     </extensions>
 
-<actions>
-    <action
-        id="com.hackitall.actions.GenerateKdoc"
-        class="com.hackitall.actions.GenerateKdoc"
-        text="Generate Kdoc type documentation"
-        description="SDK action example">
-        <add-to-group group-id="EditorPopupMenu" anchor="last"/>
-    </action>
+    <actions>
+        <action
+                id="com.hackitall.actions.GenerateKdoc"
+                class="com.hackitall.actions.GenerateKdoc"
+                text="Generate Kdoc type documentation"
+                description="SDK action example">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
 
-</actions>
+    </actions>
+
+
 </idea-plugin>
