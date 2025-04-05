@@ -31,6 +31,12 @@ intellij {
     plugins.set(listOf(/* Plugin Dependencies */))
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
 tasks {
     // Set the JVM compatibility versions
     withType<JavaCompile> {
