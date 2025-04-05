@@ -12,6 +12,13 @@ import java.io.ByteArrayInputStream
 import java.io.File
 import javax.sound.sampled.*
 
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.IOException
+import java.util.concurrent.TimeUnit
+
+
 class Speech : AnAction("Record and Save Audio") {
 
     private val defaultAudioFormat = AudioFormat(16000f, 16, 1, true, false)
@@ -21,6 +28,7 @@ class Speech : AnAction("Record and Save Audio") {
         val project = e.project
         val saveDirectory = project?.basePath ?: System.getProperty("user.home")
         val saveFilePath = "$saveDirectory/recorded_audio_${System.currentTimeMillis()}.wav"
+        println("Recording Audio to $saveFilePath")
 
         ProgressManager.getInstance().run(object : Task.Backgroundable(project, "Recording and Saving Audio...", true) {
             var recordingSuccessful = false
@@ -34,6 +42,10 @@ class Speech : AnAction("Record and Save Audio") {
                 if (recordingSuccessful) {
                     Messages.showInfoMessage("Audio saved to: $saveFilePath", "Recording Successful")
                     // You can now proceed with transcription or other actions using this saved file
+
+                    val apiKey = "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"
+                    val transcription = transcribeAudioFile(saveFilePath, apiKey)
+                    println("Transcription: $transcription")
                 } else {
                     // Message would have been shown by recordAndSaveAudio on failure
                 }
@@ -43,6 +55,9 @@ class Speech : AnAction("Record and Save Audio") {
                 Messages.showErrorDialog(project, "Error during recording: ${error.message}", "Recording Error")
             }
         })
+
+
+
     }
 
     private fun recordAndSaveAudio(durationMillis: Long, saveFilePath: String, audioFormat: AudioFormat): Boolean {
@@ -90,5 +105,39 @@ class Speech : AnAction("Record and Save Audio") {
             targetDataLine?.close()
         }
         return success
+    }
+
+    fun transcribeAudioFile(filePath: String, apiKey: String): String {
+        val client = OkHttpClient.Builder().callTimeout(30, TimeUnit.SECONDS).build()
+        val audioFile = File(filePath)
+
+        val requestBody = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("file", audioFile.name, audioFile.asRequestBody("audio/wav".toMediaTypeOrNull()))
+            .build()
+
+        val request = Request.Builder()
+            .url("https://api-inference.huggingface.co/models/openai/whisper-large-v3-turbo")
+            .header("Authorization", "Bearer $apiKey")
+            .post(requestBody)
+            .build()
+
+        return try {
+            val response = client.newCall(request).execute()
+            if (response.isSuccessful) {
+                val responseBody = response.body?.string()
+                if (responseBody != null) {
+                    val jsonResponse = com.google.gson.JsonParser.parseString(responseBody).asJsonObject
+                    jsonResponse.get("text").asString
+                } else {
+                    "No response body"
+                }
+            } else {
+                "Error transcribing audio: ${response.body?.string()}"
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+            "Failed to transcribe audio"
+        }
     }
 }
