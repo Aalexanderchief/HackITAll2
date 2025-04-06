@@ -27,7 +27,12 @@
     <extensions defaultExtensionNs="com.intellij">
 
         <toolWindow id="MascotView" anchor="bottom" factoryClass="com.hackitall.actions.MascotToolWindowFactory"
-                     secondary="true" canCloseContents="false"/>
+                    secondary="true" canCloseContents="false"/>
+
+        <toolWindow id="Parallel Universe" anchor="bottom"
+                    factoryClass="com.hackitall.actions.ParallelUniverseToolWindow"
+        />
+
     </extensions>
 
     <actions>
@@ -38,6 +43,15 @@
                 description="SDK action example">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
         </action>
+
+
+        <action id="com.hackitall.actions.ParallelUniverseDebuggerAction"
+                class="com.hackitall.actions.ParallelUniverseDebuggerAction"
+                text="Parallel Universe Debugger"
+                description="Simulează toate ramurile execuției unei funcții Kotlin">
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+        </action>
+
 
     </actions>
 
