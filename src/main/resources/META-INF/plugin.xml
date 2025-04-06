@@ -18,6 +18,7 @@
     <em>Supports various HTML tags for formatting</em>
   ]]></description>
 
+
     <!-- Product and plugin compatibility requirements.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
@@ -25,6 +26,13 @@
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
+
+        <toolWindow id="MascotView" anchor="bottom" factoryClass="com.hackitall.actions.MascotToolWindowFactory"
+                    secondary="true" canCloseContents="false"/>
+
+        <toolWindow id="Parallel Universe" anchor="bottom"
+                    factoryClass="com.hackitall.actions.ParallelUniverseToolWindow"
+        />
 
     </extensions>
 
@@ -52,4 +60,24 @@
             <add-to-group group-id="ToolsMenu" anchor="first"/>
         </action>
     </actions>
+</idea-plugin>
+                id="com.hackitall.actions.GenerateKdoc"
+                class="com.hackitall.actions.GenerateKdoc"
+                text="Generate Kdoc type documentation"
+                description="SDK action example">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+
+
+        <action id="com.hackitall.actions.ParallelUniverseDebuggerAction"
+                class="com.hackitall.actions.ParallelUniverseDebuggerAction"
+                text="Parallel Universe Debugger"
+                description="Simulează toate ramurile execuției unei funcții Kotlin">
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+        </action>
+
+
+    </actions>
+
+
 </idea-plugin>

@@ -20,6 +20,14 @@ dependencies {
 sourceSets {
     main {
         kotlin.srcDirs("src/main/kotlin")
+sourceSets {
+    main {
+        kotlin.srcDirs("src/main/kotlin")
+        java.srcDirs("src/main/java")
+    }
+    test {
+        kotlin.srcDirs("src/test/kotlin")
+        java.srcDirs("src/test/java")
     }
 }
 
@@ -29,7 +37,7 @@ intellij {
     version.set("2024.1.7")
     type.set("IC") // Target IDE Platform
 
-    plugins.set(listOf(/* Plugin Dependencies */))
+    plugins.set(listOf("Kotlin"))
 }
 
 java {
@@ -62,6 +70,4 @@ tasks {
     publishPlugin {
         token.set(System.getenv("PUBLISH_TOKEN"))
     }
-
-
 }
