@@ -44,5 +44,12 @@
                 description="Record speech and display the result">
             <add-to-group group-id="ToolsMenu" anchor="first"/>
         </action>
+        <action
+                id="com.hackitall.actions.GenerateBoilerplateCodeAction"
+                class="com.hackitall.actions.GenerateBoilerplateCodeAction"
+                text="Speech To Text"
+                description="GenerateBoilerplate">
+            <add-to-group group-id="ToolsMenu" anchor="first"/>
+        </action>
     </actions>
 </idea-plugin>
