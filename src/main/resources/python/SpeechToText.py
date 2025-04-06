@@ -14,7 +14,7 @@ def main():
     r.pause_threshold = 1.8
 
     # Minimum length of silence to consider the phrase complete
-    r.non_speaking_duration = 1
+    r.non_speaking_duration = 1.5
 
     with mic as source:
         print(" Adjusting for ambient noise...")
