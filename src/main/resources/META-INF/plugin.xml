@@ -23,6 +23,8 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>org.jetbrains.kotlin</depends>
 
+
+
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
@@ -40,6 +42,13 @@
                 class="com.hackitall.actions.GenerateTestsAction"
                 text="Generează Teste"
                 description="Creează fișier JUnit pentru metodele Kotlin">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+        <action
+                id="com.hackitall.actions.GenerateKdoc"
+                class="com.hackitall.actions.GenerateKdoc"
+                text="Generate Kdoc type documentation"
+                description="SDK action example">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
         </action>
 

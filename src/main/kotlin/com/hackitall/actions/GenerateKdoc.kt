@@ -13,9 +13,9 @@ class GenerateKdoc : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
 
 
-        val project = e.project ;
-        val dialog = dialogUI(project) ;
-        dialog.show()
+//        val project = e.project ;
+//        val dialog = dialogUI(project) ;
+//        dialog.show()
 
 
         val editor = e.getData(CommonDataKeys.EDITOR) ?: return
