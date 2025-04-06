@@ -12,11 +12,9 @@ class GenerateKdoc : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
 
-
 //        val project = e.project ;
 //        val dialog = dialogUI(project) ;
 //        dialog.show()
-
 
         val editor = e.getData(CommonDataKeys.EDITOR) ?: return
         val document = editor.document
@@ -195,6 +193,8 @@ class GenerateKdoc : AnAction() {
         if (!found) explanation.appendLine("\n- basic expressions or assignments.")
         return explanation.toString()
     }
+
+
 
 
 }
