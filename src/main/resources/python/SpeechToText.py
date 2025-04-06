@@ -8,10 +8,10 @@ mic = sr.Microphone()
 def main():
     # Set the energy threshold for voice detection
     # Values between 300-3000 are common, adjust based on your environment
-    r.energy_threshold = 1000
+    r.energy_threshold = 500
 
     # How long to wait in silence before considering the speech ended (in seconds)
-    r.pause_threshold = 1.3
+    r.pause_threshold = 1.8
 
     # Minimum length of silence to consider the phrase complete
     r.non_speaking_duration = 1

@@ -9,55 +9,76 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    google()
 }
 
 dependencies {
-    implementation("com.squareup.okhttp3:okhttp:4.10.0")
-    implementation("com.google.code.gson:gson:2.8.9")
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")  // OkHttp for HTTP requests
+    implementation("com.google.code.gson:gson:2.8.9")  // Gson for JSON parsing
+//    implementation("com.google.cloud:google-cloud-speech:4.21.0")
 }
 
 sourceSets {
-    named("main") {
-        java.srcDirs("src/main/java", "src/main/kotlin")
+
+    main {
+        kotlin.srcDirs("src/main/kotlin")
+        java.srcDirs("src/main/java")
     }
-    named("test") {
-        java.srcDirs("src/test/java", "src/test/kotlin")
+    test {
+        kotlin.srcDirs("src/test/kotlin")
+        java.srcDirs("src/test/java")
     }
 }
 
-intellij {
-    version.set("2024.1.7")
-    type.set("IC")
-    plugins.set(listOf("Kotlin"))
-}
+// Configure Gradle IntelliJ Plugin
+// Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
+        intellij {
+            version.set("2024.1.7")
+            type.set("IC") // Target IDE Platform
+            plugins.set(listOf("Kotlin", "java", "junit", "testng", "org.jetbrains.plugins.gradle", "terminal"))
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
-    }
-}
+            plugins.set(listOf("Kotlin"))
+        }
 
-tasks {
-    withType<JavaCompile> {
-        sourceCompatibility = "17"
-        targetCompatibility = "17"
-    }
-    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        kotlinOptions.jvmTarget = "17"
-    }
+        dependencies {
+            implementation("com.squareup.okhttp3:okhttp:4.11.0")
+            implementation("com.google.code.gson:gson:2.10.1")
+            implementation(kotlin("stdlib"))
+            testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
+            testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
+        }
 
-    patchPluginXml {
-        sinceBuild.set("241")
-        untilBuild.set("243.*")
-    }
+        tasks {
+            // Set the JVM compatibility versions
+            withType<JavaCompile> {
+                sourceCompatibility = "17"
+                targetCompatibility = "17"
+            }
+            withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+                kotlinOptions.jvmTarget = "17"
+            }
+            test {
+                useJUnitPlatform()
+            }
+            patchPluginXml {
+                sinceBuild.set("241")
+                untilBuild.set("243.*")
+            }
 
-    signPlugin {
-        certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
-        privateKey.set(System.getenv("PRIVATE_KEY"))
-        password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
-    }
+            signPlugin {
+                certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
+                privateKey.set(System.getenv("PRIVATE_KEY"))
+                password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
+            }
 
-    publishPlugin {
-        token.set(System.getenv("PUBLISH_TOKEN"))
-    }
-}
+            patchPluginXml {
+                changeNotes.set("Added GenerateKDocAction")
+            }
+            runIde {
+                jvmArgs = listOf("--enable-native-access=ALL-UNNAMED")
+            }
+
+            publishPlugin {
+                token.set(System.getenv("PUBLISH_TOKEN"))
+            }
+        }
