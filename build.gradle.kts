@@ -9,6 +9,7 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    google()
 }
 
 dependencies {
@@ -36,6 +37,7 @@ sourceSets {
 intellij {
     version.set("2024.1.7")
     type.set("IC") // Target IDE Platform
+    plugins.set(listOf("Kotlin", "java", "junit", "testng", "org.jetbrains.plugins.gradle", "terminal"))
 
     plugins.set(listOf("Kotlin"))
 }
@@ -44,6 +46,14 @@ java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(17))
     }
+}
+
+dependencies {
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation("com.google.code.gson:gson:2.10.1")
+    implementation(kotlin("stdlib"))
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
 }
 
 tasks {
@@ -55,7 +65,9 @@ tasks {
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions.jvmTarget = "17"
     }
-
+    test {
+        useJUnitPlatform()
+    }
     patchPluginXml {
         sinceBuild.set("241")
         untilBuild.set("243.*")
@@ -65,6 +77,13 @@ tasks {
         certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
         privateKey.set(System.getenv("PRIVATE_KEY"))
         password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
+    }
+
+    patchPluginXml {
+        changeNotes.set("Added GenerateKDocAction")
+    }
+    runIde {
+        jvmArgs = listOf("--enable-native-access=ALL-UNNAMED")
     }
 
     publishPlugin {
