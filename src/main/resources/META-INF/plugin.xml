@@ -38,8 +38,8 @@
         </action>
 
         <action
-                id="com.hackitall.actions.speech_to_text.Speech"
-                class="com.hackitall.actions.speech_to_text.Speech"
+                id="com.hackitall.actions.speech_to_text.SpeechToTextAction"
+                class="com.hackitall.actions.speech_to_text.SpeechToTextAction"
                 text="Speech To Text"
                 description="Record speech and display the result">
             <add-to-group group-id="ToolsMenu" anchor="first"/>

@@ -1,28 +1,17 @@
 package com.hackitall.actions.speech_to_text
 
-import com.google.gson.JsonParser
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.ui.DialogWrapper
-import okhttp3.*
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.RequestBody.Companion.toRequestBody
-import java.io.ByteArrayOutputStream
-import java.io.File
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.io.IOException
-import java.util.concurrent.TimeUnit
-import javax.sound.sampled.AudioFormat
-import javax.sound.sampled.AudioSystem
-import javax.sound.sampled.LineUnavailableException
-import javax.sound.sampled.TargetDataLine
+import java.io.File
 
 class SpeechToTextAction : AnAction("Record Speech") {
 
-    private var isRecording = false
-    private var audioBytes = ByteArrayOutputStream()
-    private val audioFormat = AudioFormat(16000f, 16, 1, true, false)  // 16 kHz, 16-bit, mono
-    private var targetDataLine: TargetDataLine? = null
+    private var pythonProcess: Process? = null
 
     override fun actionPerformed(e: AnActionEvent) {
         // Create and display the dialog immediately upon clicking the action
@@ -31,25 +20,22 @@ class SpeechToTextAction : AnAction("Record Speech") {
     }
 
     inner class RecordingDialog : DialogWrapper(true) {
-        private val apiKey = "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"
-
         init {
             init()
             title = "Speech to Text Recorder"
         }
 
-        override fun createCenterPanel(): javax.swing.JComponent? {
+        override fun createCenterPanel(): javax.swing.JComponent {
             val panel = javax.swing.JPanel()
             val stopButton = javax.swing.JButton("Stop Recording")
-            val statusLabel = javax.swing.JLabel("Not Recording")  // Initial status label
+            val statusLabel = javax.swing.JLabel("Recording...")  // Initial status label set to "Recording" immediately
 
             // Start recording immediately when the dialog is opened
             startRecording(statusLabel)
 
             stopButton.addActionListener {
                 // Stop recording when the Stop button is clicked
-                stopRecording()
-                val transcribedText = transcribeAudio(audioBytes.toByteArray())
+                val transcribedText = getTranscription()
                 Messages.showMessageDialog(
                     "You said: $transcribedText",
                     "Transcription",
@@ -69,95 +55,57 @@ class SpeechToTextAction : AnAction("Record Speech") {
         }
 
         private fun startRecording(statusLabel: javax.swing.JLabel) {
+            statusLabel.text = "Recording..."
+            val scriptPath = "src${File.separator}main${File.separator}python${File.separator}speech_to_text${File.separator}SpeechToText.py"
+
+            // Check if the script exists before running the process
+            val scriptFile = File(scriptPath)
+            if (!scriptFile.exists()) {
+                statusLabel.text = "Error: Script not found"
+                return
+            }
+
             try {
-                val line: TargetDataLine = AudioSystem.getTargetDataLine(audioFormat)
-                println("Attempting to open microphone...")
-                line.open(audioFormat)
-                line.start()
-                targetDataLine = line
+                // Log start of process
+                println("Starting Python process for speech-to-text...")
 
-                // Update UI label
-                statusLabel.text = "Recording..."
-                println("Microphone successfully opened and recording started.")
+                // Start Python script for recording
+                pythonProcess = ProcessBuilder("python3", scriptPath)
+                    .start()
 
-                // Create a thread to capture audio input
-                Thread {
-                    val buffer = ByteArray(1024)
-                    while (isRecording) {
-                        val bytesRead = line.read(buffer, 0, buffer.size)
-                        if (bytesRead > 0) {
-                            audioBytes.write(buffer, 0, bytesRead)
-                        }
-                    }
-                }.start()
-
-                isRecording = true
-            } catch (ex: LineUnavailableException) {
-                ex.printStackTrace()
-                showMessage("Error starting recording: ${ex.message}")
+                // Log success of process start
+                println("Python process started successfully.")
+            } catch (e: IOException) {
+                e.printStackTrace()
+                statusLabel.text = "Error starting recording"
+                println("Error starting Python process: ${e.message}")
             }
         }
 
-        private fun stopRecording() {
-            // Stop recording
-            isRecording = false
-            targetDataLine?.stop()
-            targetDataLine?.close()
-            targetDataLine = null
-            println("Recording stopped.")
-        }
+        private fun getTranscription(): String {
+            return try {
+                // Wait for the Python process to complete
+                println("Waiting for Python process to complete...")
+                pythonProcess?.waitFor()
 
-        private fun showMessage(message: String) {
-            Messages.showMessageDialog(message, "Information", Messages.getInformationIcon())
-        }
+                // Log completion of the Python process
+                println("Python process completed.")
 
-        private fun transcribeAudio(audioData: ByteArray): String {
-            val client = OkHttpClient.Builder().callTimeout(30, TimeUnit.SECONDS).build()
+                // Now that the process is finished, capture the output
+                val reader = BufferedReader(InputStreamReader(pythonProcess!!.inputStream))
+                val transcription = reader.readLine() ?: "Error transcribing audio"
 
-            // Prepare the audio data for Hugging Face API (using multipart form-data)
-            val requestBody = MultipartBody.Builder()
-                .setType(MultipartBody.FORM)
-                .addFormDataPart("file", "audio.wav", audioData.toRequestBody("audio/wav".toMediaTypeOrNull()))
-                .build()
-
-            println("requestBody: $requestBody")
-
-            // Make sure you use the correct Hugging Face API URL (replace with your desired model)
-            val request = Request.Builder()
-                .url("https://api-inference.huggingface.co/models/openai/whisper-large-v3-turbo")
-                .header("Authorization", "Bearer $apiKey")
-                .post(requestBody)
-                .build()
-
-            println("request: $request")
-
-            try {
-                val response = client.newCall(request).execute()
-
-                println("response: $response")
-
-                // Check if the response was successful
-                if (response.isSuccessful) {
-                    val responseBody = response.body?.string()
-                    return if (responseBody != null) {
-                        // Parse the response JSON and extract the transcription
-                        val jsonResponse = JsonParser.parseString(responseBody).asJsonObject
-                        val transcription = jsonResponse.get("text").asString
-                        println("Transcription successful: $transcription")
-                        transcription
-                    } else {
-                        println("Response body is null")
-                        "No response body"
-                    }
-                } else {
-                    // Print the error response body for debugging
-                    val responseBody = response.body?.string()
-                    println("Error response body: $responseBody")
-                    return "Error transcribing audio"
-                }
-            } catch (e: IOException) {
+                // Log the transcription result
+                println("Transcription: $transcription")
+                transcription
+            } catch (e: Exception) {
                 e.printStackTrace()
-                return "Failed to transcribe audio"
+                println("Error getting transcription: ${e.message}")
+                "Error getting transcription"
+            } finally {
+                // Destroy the Python process after transcription is retrieved
+                pythonProcess?.destroy()
+                println("Python process destroyed.")
             }
         }
     }
