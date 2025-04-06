@@ -12,31 +12,22 @@ repositories {
 }
 
 dependencies {
-    implementation("com.squareup.okhttp3:okhttp:4.10.0")  // OkHttp for HTTP requests
-    implementation("com.google.code.gson:gson:2.8.9")  // Gson for JSON parsing
-//    implementation("com.google.cloud:google-cloud-speech:4.21.0")
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
+    implementation("com.google.code.gson:gson:2.8.9")
 }
 
 sourceSets {
-    main {
-        kotlin.srcDirs("src/main/kotlin")
-sourceSets {
-    main {
-        kotlin.srcDirs("src/main/kotlin")
-        java.srcDirs("src/main/java")
+    named("main") {
+        java.srcDirs("src/main/java", "src/main/kotlin")
     }
-    test {
-        kotlin.srcDirs("src/test/kotlin")
-        java.srcDirs("src/test/java")
+    named("test") {
+        java.srcDirs("src/test/java", "src/test/kotlin")
     }
 }
 
-// Configure Gradle IntelliJ Plugin
-// Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 intellij {
     version.set("2024.1.7")
-    type.set("IC") // Target IDE Platform
-
+    type.set("IC")
     plugins.set(listOf("Kotlin"))
 }
 
@@ -47,7 +38,6 @@ java {
 }
 
 tasks {
-    // Set the JVM compatibility versions
     withType<JavaCompile> {
         sourceCompatibility = "17"
         targetCompatibility = "17"
