@@ -11,6 +11,15 @@ repositories {
     mavenCentral()
 }
 
+dependencies {
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")  // OkHttp for HTTP requests
+    implementation("com.google.code.gson:gson:2.8.9")  // Gson for JSON parsing
+//    implementation("com.google.cloud:google-cloud-speech:4.21.0")
+}
+
+sourceSets {
+    main {
+        kotlin.srcDirs("src/main/kotlin")
 sourceSets {
     main {
         kotlin.srcDirs("src/main/kotlin")
@@ -61,8 +70,4 @@ tasks {
     publishPlugin {
         token.set(System.getenv("PUBLISH_TOKEN"))
     }
-
-
-
-
 }
